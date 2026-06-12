@@ -1,0 +1,294 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3c964e27-a5a3-4959-b171-766f4314a1db",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mNQHHlQjatuTtoNz",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Order",
+              "description": "when any email come with the text inside include new order it will seperated"
+            },
+            {
+              "category": "inquiry",
+              "description": "if any email include word inquiry or costumer asking any type of question need to be seperated"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9dc2302e-ad6d-41ae-baaa-97b9d4c28627",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        176.5,
+        208
+      ],
+      "id": "7eafba22-74fb-41f7-a557-58f78c09ef15",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "cFiokbxLiYX70QDj",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional customer support assistant.\n\nGenerate a reply in exactly this format:\n\nSubject: <email subject>\n\nEmail Body:\n<email body>{{ $json.snippet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        576,
+        144
+      ],
+      "id": "c11305cf-bd01-442b-8d6e-46da1773929e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        432,
+        304
+      ],
+      "id": "26dd20d8-52f0-4c77-843f-c06f1945626d",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "cFiokbxLiYX70QDj",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        96
+      ],
+      "id": "ba2692fe-b22f-4c7c-bf66-9cb79e4f874c",
+      "name": "Create a draft",
+      "webhookId": "3f99987b-d99a-498c-9885-8c0b25bcc5d0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mNQHHlQjatuTtoNz",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional customer support and business email assistant.\n\nYour task is to read incoming emails and generate a professional, polite, and helpful response.\n\nGuidelines:\n\n* Understand the customer's inquiry carefully.\n* Respond in a friendly, professional, and business-oriented tone.\n* Keep replies clear, concise, and relevant.\n* If information is missing, politely ask for the required details.\n* If the email is about pricing, products, services, availability, delivery, or support, provide an appropriate response.\n* Thank the sender for contacting us.\n* End every email with a professional closing.\n\nGenerate your response in the following format:\n\nSubject: [Professional Email Subject]\n\nEmail Body:\n[Complete Email Reply]\n\nExample Closing:\n\nBest Regards,\nCustomer Support Team\n\nRules:\n\n* Do not mention that you are an AI.\n* Do not include explanations outside the email.\n* Generate only the final email response.\n* Maintain a professional business communication style at all times.\n {{ $json.snippet }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "463dda25-ffef-462c-bde9-fc2631af2fc9",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        512,
+        0
+      ],
+      "id": "c1d5e5a7-b147-41ea-a98d-15092a89ea34",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "cFiokbxLiYX70QDj",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -160
+      ],
+      "id": "9de5d313-b8d7-4076-a78a-45588c4617b8",
+      "name": "Create a draft1",
+      "webhookId": "1fd9f485-fe52-459c-87bc-e6a62575127b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mNQHHlQjatuTtoNz",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Create a draft1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e0790416-cd0d-40bb-b910-768c99303cba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8390c236a0fe9581c678bcca20621bc858001f78bae5fe6d059fb272ec06246a"
+  },
+  "nodeGroups": [],
+  "id": "MiGW9W2tPFzfNYvw",
+  "tags": []
+}
